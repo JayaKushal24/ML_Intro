@@ -1,0 +1,62 @@
+#JayaKushal24
+import matplotlib.pyplot as plt
+import pandas as pd
+import pylab as pl
+import numpy as np
+from sklearn import linear_model
+from sklearn.metrics import r2_score
+
+df = pd.read_csv("D:\Python_VsCode\practise\Coursera\FuelConsumption.csv")
+
+# take a look at the dataset
+print(df.head())#gives first 5 entries and also the headers
+# summarize the data
+print("describe function\n", df.describe())
+#feature1
+cdf = df[['ENGINESIZE','CYLINDERS','FUELCONSUMPTION','COEMISSIONS']]
+print(cdf.head(9))#9 rows of data is displayed
+#feature 2
+cdf.hist()
+plt.show()
+#feature 3
+
+plt.scatter(cdf.FUELCONSUMPTION, cdf.COEMISSIONS, color='blue')#1
+plt.xlabel("FUEL CONSUMPTION")
+plt.ylabel("COEMISSIONS ")
+plt.show()
+
+plt.scatter(cdf.ENGINESIZE, cdf.COEMISSIONS,  color='blue')#2
+plt.xlabel("Engine size")
+plt.ylabel("Emission")
+plt.show()
+
+#taking 80 percent of the entire data to train and the rest to test
+msk = np.random.rand(len(df)) < 0.8 # 639 times values are generaated between 0 and 1
+#true and false array is created here based on 0.8 value
+train = cdf[msk]#true =train
+test = cdf[~msk]#false =test
+
+#training
+regr = linear_model.LinearRegression()#inbuilt fn
+train_x = np.asanyarray(train[['ENGINESIZE']])
+train_y = np.asanyarray(train[['COEMISSIONS']])
+regr.fit(train_x, train_y)
+# The coefficients
+print ('Coefficients: ', regr.coef_)
+print ('Intercept: ',regr.intercept_)
+
+plt.scatter(train.ENGINESIZE, train.COEMISSIONS,  color='blue')
+plt.plot(train_x, regr.coef_[0][0]*train_x + regr.intercept_[0], '-r')#linear regression
+plt.xlabel("Engine size")
+plt.ylabel("Emission")
+plt.show()
+
+#testing
+test_x = np.asanyarray(test[['ENGINESIZE']])
+test_y = np.asanyarray(test[['COEMISSIONS']])#already obtained values
+test_y1 = regr.predict(test_x)#newly calulated values
+
+print("Mean absolute error: %.2f" % np.mean(np.absolute(test_y1 - test_y)))#|calculated-existing| rounded off to 2 decimals
+print("Residual sum of squares (MSE): %.2f" % np.mean((test_y1 - test_y) ** 2))
+print("R2-score: %.2f" % r2_score(test_y , test_y1) )#The higher the R-squared value, the better the model fits your data.
+#r2_score => a metric to measure the performance of your regression model. It represents how close the data points are to the fitted regression line
